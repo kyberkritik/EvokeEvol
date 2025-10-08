@@ -58,7 +58,7 @@ h1{color:#10b981;}
     </div>
   </div>
   <div style="text-align: center; margin-top: 1rem; padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 6px;">
-    <small style="opacity: 0.6;">Click "Switch Sounds" to alternate between wave type configurations</small>
+    <small style="opacity: 0.6;">Click "Switch Sounds" to swap the wave types between parts</small>
   </div>
 </div>
 
@@ -69,7 +69,7 @@ let isPlaying = false;
 let audioNodes = [];
 let loopTimeout = null;
 let loadedParts = null;
-let soundsSwapped = true; // Track if sounds are swapped - start with swapped sounds
+let soundsSwapped = false; // Track if sounds are swapped
 
 // Convert MusicXML pitch to frequency
 function pitchToFreq(step, alter, octave){
