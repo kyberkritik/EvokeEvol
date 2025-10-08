@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lead XML Test — WebKit Audio</title>
+<style>
+body{
+  background:#0b0f14;
+  color:#cfe8ff;
+  font-family:"IBM Plex Mono", monospace;
+  text-align:center;
+  padding:2rem;
+}
+button{
+  background:linear-gradient(180deg,#1b2a3a,#0d1826);
+  border:none;
+  color:#cfe8ff;
+  border-radius:12px;
+  padding:1rem 2rem;
+  font-size:1.1rem;
+  cursor:pointer;
+  box-shadow:0 0 12px rgba(78,169,255,.3);
+}
+button:hover{color:#10b981;}
+h1{color:#10b981;}
+</style>
+</head>
+<body>
+<button onclick="window.location.href='../index.html'" style="position:absolute;top:20px;left:20px;font-size:0.9rem;">← Inicio</button>
+<h1>:Evoke Evol: — Lead XML Playback</h1>
+<p>Plays the notes extracted from <code>lead.xml</code> with proper timing and harmonies.</p>
+<div style="margin: 2rem 0;">
+  <button id="play">▶ Play Lead</button>
+  <p id="status" style="margin-top:1rem;opacity:0.7;font-size:0.9rem;">Click to play your composed melody</p>
+</div>
+
+<script>
+// Convert MusicXML pitch to frequency
+function pitchToFreq(step, alter, octave){
+  const pitchMap = {C:0, D:2, E:4, F:5, G:7, A:9, B:11};
+  const semitone = pitchMap[step] + (alter || 0);
+  const midi = 12 * (octave + 1) + semitone;
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+
+// Parse XML and extract note data with proper timing
+async function loadXMLNotes(url){
+  const res = await fetch(url);
+  const text = await res.text();
+  const xml = new DOMParser().parseFromString(text, "application/xml");
+  
+  // Get divisions for timing calculation
+  const divisions = parseInt(xml.querySelector("divisions")?.textContent || 4);
+  
+  const noteEls = Array.from(xml.querySelectorAll("note"));
+  let notes = [];
+  let currentTime = 0;
+  
+  console.log(`Processing ${noteEls.length} note elements with divisions: ${divisions}`);
+  
+  noteEls.forEach((noteEl, index) => {
+    const isChord = noteEl.querySelector("chord") !== null;
+    const isRest = noteEl.querySelector("rest") !== null;
+    
+    if(!isRest) {
+      const step = noteEl.querySelector("step")?.textContent;
+      const octave = parseInt(noteEl.querySelector("octave")?.textContent || 4);
+      const alter = parseInt(noteEl.querySelector("alter")?.textContent || 0);
+      const duration = parseFloat(noteEl.querySelector("duration")?.textContent || 1);
+      
+      if(step) {
+        notes.push({
+          time: currentTime / divisions, // Convert to quarter note units
+          step, 
+          octave, 
+          alter, 
+          duration: duration / divisions,
+          isChord
+        });
+      }
+    } else {
+      // Handle rest
+      const duration = parseFloat(noteEl.querySelector("duration")?.textContent || 1);
+      console.log(`Rest of duration ${duration} at time ${currentTime}`);
+    }
+    
+    // Only advance time if this is NOT a chord note
+    if(!isChord) {
+      const duration = parseFloat(noteEl.querySelector("duration")?.textContent || 1);
+      currentTime += duration;
+    }
+  });
+  
+  console.log(`Extracted ${notes.length} notes`);
+  return notes;
+}
+
+// Play using Web Audio API with proper timing and harmonies
+async function playNotes(){
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  if(ctx.state === "suspended") await ctx.resume();
+  const notes = await loadXMLNotes("lead.xml");
+  const start = ctx.currentTime + 0.5;
+  const tempo = 120; // BPM from XML
+  const beat = 60/tempo; // Quarter note duration in seconds
+  
+  console.log("Playing", notes.length, "notes");
+  console.log("Tempo:", tempo, "BPM, Beat duration:", beat, "seconds");
+
+  // Group notes by time to handle chords properly
+  const noteGroups = {};
+  notes.forEach(note => {
+    const timeKey = note.time.toFixed(3); // Round to avoid floating point issues
+    if(!noteGroups[timeKey]) {
+      noteGroups[timeKey] = [];
+    }
+    noteGroups[timeKey].push(note);
+  });
+
+  console.log(`Grouped into ${Object.keys(noteGroups).length} time slots`);
+
+  // Play each time group
+  Object.keys(noteGroups).forEach(timeKey => {
+    const noteGroup = noteGroups[timeKey];
+    const playTime = parseFloat(timeKey);
+    
+    noteGroup.forEach((note, i) => {
+      const freq = pitchToFreq(note.step, note.alter, note.octave);
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      
+      // Use triangle wave for softer harmony sound
+      osc.type = i === 0 ? "square" : "triangle";
+      osc.frequency.value = freq;
+      
+      // Lower volume for chord notes
+      const volume = noteGroup.length > 1 ? 0.1 / noteGroup.length : 0.15;
+      g.gain.value = volume;
+      
+      // Add envelope for more musical sound
+      const t = start + playTime * beat;
+      const duration = note.duration * beat;
+      
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(volume, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.001, t + duration * 0.9);
+      
+      osc.connect(g).connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + duration);
+      
+      console.log(`Note ${note.step}${note.octave} at ${playTime.toFixed(2)}qt, dur: ${note.duration.toFixed(2)}qt`);
+    });
+  });
+}
+
+document.getElementById("play").onclick = async () => {
+  const button = document.getElementById("play");
+  const status = document.getElementById("status");
+  
+  try {
+    button.textContent = "Loading...";
+    button.disabled = true;
+    status.textContent = "Loading and parsing XML...";
+    
+    await playNotes();
+    
+    button.textContent = "♪ Playing...";
+    status.textContent = "Playing your composed melody with proper harmonies";
+    
+    // Reset after estimated duration (rough calculation)
+    setTimeout(() => {
+      button.textContent = "▶ Play Lead";
+      button.disabled = false;
+      status.textContent = "Click to play your composed melody";
+    }, 10000); // 10 seconds estimated
+    
+  } catch(error) {
+    console.error("Playback error:", error);
+    button.textContent = "▶ Play Lead";
+    button.disabled = false;
+    status.textContent = "Error: " + error.message;
+  }
+};
+</script>
+</body>
+</html>

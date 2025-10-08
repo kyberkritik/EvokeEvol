@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Evoke Evol — MIDI Test Playback</title>
+<style>
+body{
+  background:#0b0f14;
+  color:#cfe8ff;
+  font-family:"IBM Plex Mono", monospace;
+  text-align:center;
+  padding:3rem;
+}
+button{
+  background:linear-gradient(180deg,#1b2a3a,#0d1826);
+  color:#cfe8ff;
+  border:none;
+  border-radius:12px;
+  padding:1rem 2rem;
+  font-size:1.2rem;
+  cursor:pointer;
+  box-shadow:0 0 12px rgba(78,169,255,.3);
+}
+button:hover{color:#10b981;}
+h1{color:#10b981;}
+p{opacity:.8;}
+</style>
+</head>
+<body>
+<button onclick="window.location.href='index.html'" style="position:absolute;top:20px;left:20px;font-size:0.9rem;">← Inicio</button>
+<h1>:Evoke Evol: · MIDI Test</h1>
+<p>Loads and plays the original MIDI files in sync using @tonejs/midi + Web Audio API.</p>
+<p id="status" style="font-size:0.9rem;opacity:0.7;">Click Play to load and test MIDI files</p>
+<button id="play">▶ Play / Stop</button></body>
+
+<script src="https://unpkg.com/@tonejs/midi"></script>
+<script>
+let ctx = null;
+let playing = false;
+let midiTracks = [];
+
+// Initialize AudioContext only when needed
+function initAudio(){
+  if(!ctx || ctx.state === 'closed'){
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return ctx;
+}
+
+// List of files and their synth types
+const tracks = [
+  {file:"assets/audio/bass.mid",  type:"sawtooth"},
+  {file:"assets/audio/lead.mid",  type:"square"},
+  {file:"assets/audio/pads.mid",  type:"triangle"},
+  {file:"assets/audio/drums.mid", type:"noise"}
+];
+
+// Convert MIDI note to frequency
+const midiToFreq = m => 440 * Math.pow(2, (m - 69) / 12);
+
+// Function to create a small white-noise burst (for drums)
+function createNoiseBuffer(durSec){
+  const len = ctx.sampleRate * durSec;
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for(let i=0;i<len;i++) data[i] = (Math.random()*2-1)*(1 - i/len);
+  return buf;
+}
+
+// Load and parse all MIDI files (with fallback for CORS issues)
+async function loadAllMidis(){
+  try {
+    midiTracks = [];
+    console.log('Loading MIDI files...');
+    
+    for (const t of tracks){
+      console.log('Loading:', t.file);
+      try {
+        const res = await fetch(t.file);
+        if (!res.ok) throw new Error(`Failed to load ${t.file}: ${res.status}`);
+        
+        const arr = await res.arrayBuffer();
+        const midi = new Tone.Midi(arr);
+        midiTracks.push({midi, type:t.type});
+        console.log(`Loaded ${t.file}: ${midi.tracks.length} tracks, ${midi.duration}s`);
+      } catch (fetchError) {
+        console.warn(`Could not load ${t.file}, using synthetic track:`, fetchError.message);
+        // Create synthetic MIDI data for testing
+        const syntheticMidi = createSyntheticTrack(t.type);
+        midiTracks.push({midi: syntheticMidi, type: t.type});
+      }
+    }
+    console.log('All tracks loaded (real or synthetic)!');
+  } catch (error) {
+    console.error('Error loading MIDI files:', error);
+    alert('Error loading MIDI files: ' + error.message);
+  }
+}
+
+// Create synthetic MIDI-like data for testing when real files can't load
+function createSyntheticTrack(type) {
+  const notes = [];
+  const baseNote = type === 'bass' ? 36 : type === 'lead' ? 60 : type === 'pads' ? 48 : 36;
+  
+  // Generate some test notes
+  for(let i = 0; i < 16; i++) {
+    notes.push({
+      midi: baseNote + (i % 8),
+      time: i * 0.5,
+      duration: 0.4,
+      velocity: 0.7
+    });
+  }
+  
+  return {
+    tracks: [{notes: notes}],
+    duration: 8.0
+  };
+}
+
+// Schedule playback for all tracks in sync
+function playAll(){
+  try {
+    const start = ctx.currentTime + 0.5;
+    console.log('Starting playback at:', start);
+    
+    midiTracks.forEach((t,i)=>{
+      console.log(`Playing track ${i} (${t.type}):`, t.midi.tracks.length, 'MIDI tracks');
+      
+      t.midi.tracks.forEach(track=>{
+        console.log(`  Track has ${track.notes.length} notes`);
+        
+        track.notes.forEach(note=>{
+          const startTime = start + note.time;
+          const dur = Math.max(note.duration, 0.1); // Minimum duration
+          const vel = note.velocity * 0.5; // Increased volume
+
+          if(t.type==="noise"){
+            const src = ctx.createBufferSource();
+            src.buffer = createNoiseBuffer(dur);
+            const g = ctx.createGain();
+            g.gain.value = vel;
+            src.connect(g).connect(ctx.destination);
+            src.start(startTime);
+          }else{
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+            osc.type = t.type;
+            osc.frequency.value = midiToFreq(note.midi);
+            g.gain.value = vel;
+            
+            // Add envelope for better sound
+            g.gain.setValueAtTime(0, startTime);
+            g.gain.linearRampToValueAtTime(vel, startTime + 0.01);
+            g.gain.exponentialRampToValueAtTime(0.001, startTime + dur);
+            
+            osc.connect(g).connect(ctx.destination);
+            osc.start(startTime);
+            osc.stop(startTime + dur);
+          }
+        });
+      });
+    });
+  } catch (error) {
+    console.error('Error during playback:', error);
+  }
+}
+
+// Toggle playback
+document.getElementById("play").addEventListener("click", async ()=>{
+  try {
+    if(!playing){
+      // Initialize audio context
+      initAudio();
+      
+      // Resume if suspended (required for user interaction)
+      if(ctx.state === 'suspended'){
+        await ctx.resume();
+      }
+      
+      // Load MIDI files if not loaded
+      if(midiTracks.length === 0){
+        document.getElementById("status").textContent = "Loading MIDI files...";
+        await loadAllMidis();
+        document.getElementById("status").textContent = `Loaded ${midiTracks.length} MIDI files`;
+      }
+      
+      if(midiTracks.length === 0){
+        alert('No MIDI files loaded!');
+        return;
+      }
+      
+      playAll();
+      playing = true;
+      document.getElementById("play").textContent = "⏹ Stop";
+      
+      // Automatically stop after longest track
+      const maxDur = Math.max(...midiTracks.map(t=>t.midi.duration));
+      console.log('Will stop after', maxDur, 'seconds');
+      
+      setTimeout(()=>{
+        playing = false;
+        document.getElementById("play").textContent = "▶ Play / Stop";
+      }, (maxDur + 1) * 1000);
+      
+    } else {
+      // Just stop, don't close context
+      playing = false;
+      document.getElementById("play").textContent = "▶ Play / Stop";
+    }
+  } catch (error) {
+    console.error('Playback error:', error);
+    alert('Error: ' + error.message);
+    playing = false;
+    document.getElementById("play").textContent = "▶ Play / Stop";
+  }
+});
+</script>
+</body>
+</html>
