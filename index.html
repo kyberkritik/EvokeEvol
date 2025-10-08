@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Génesis y Catástrofe del Programa :Evoke Evol:</title>
+<style>
+:root{
+  --bg:#0c0f14;
+  --emerald:#10b981;
+  --metablue:#4ea9ff;
+  --ochre:#cc7722;
+  --light:#e0f2ff;
+}
+html,body{
+  margin:0;padding:0;height:100%;
+  background:radial-gradient(1600px 900px at 70% 10%, #1a2230 0%, var(--bg) 70%);
+  color:var(--light);font-family:'Segoe UI',system-ui,sans-serif;
+}
+nav{
+  position:fixed;top:0;left:0;width:100%;
+  background:rgba(0,0,0,.25);backdrop-filter:blur(8px);
+  padding:.8rem 0;text-align:center;
+  border-bottom:1px solid rgba(78,169,255,.2);
+}
+nav a{
+  color:var(--metablue);margin:0 1rem;text-decoration:none;font-weight:600;
+  transition:color .2s;
+}
+nav a:hover{color:var(--emerald);}
+header{text-align:center;padding:6rem 1rem 2rem;line-height:1.2;}
+h1{font-size:2.4rem;color:var(--emerald);text-transform:uppercase;
+    letter-spacing:1px;text-shadow:0 0 12px rgba(16,185,129,.4);}
+h1.reflection{transform:scaleY(-1);opacity:.28;color:var(--metablue);
+    filter:blur(1px);margin-top:-.5rem;}
+h2{font-size:1.4rem;color:var(--metablue);margin-top:1rem;
+    text-shadow:0 0 10px rgba(78,169,255,.4);}
+h2.reflection{transform:scaleY(-1);opacity:.25;filter:blur(1px);margin-top:-.3rem;}
+.subtitle{font-size:1rem;opacity:.8;margin-top:2rem;letter-spacing:.4px;color:var(--ochre);}
+main{display:flex;justify-content:center;flex-wrap:wrap;gap:2rem;margin-top:3.5rem;}
+.card{
+  width:320px;padding:2rem;background:rgba(255,255,255,.05);
+  border-radius:16px;text-align:center;backdrop-filter:blur(6px);
+  box-shadow:0 0 18px rgba(78,169,255,.15),inset 0 0 24px rgba(16,185,129,.05);
+  transition:transform .3s ease,box-shadow .3s ease;
+}
+.card:hover{transform:translateY(-6px);
+  box-shadow:0 0 24px rgba(78,169,255,.3),inset 0 0 30px rgba(16,185,129,.15);}
+.card a{text-decoration:none;color:var(--emerald);font-weight:600;font-size:1.1rem;}
+.card a:hover{color:var(--metablue);}
+footer{
+  position:fixed;bottom:0;left:0;right:0;
+  text-align:center;padding:.8rem;font-size:.9rem;color:#9db3c5;
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.4));
+}
+svg.bg{position:fixed;inset:0;width:100%;height:100%;z-index:-1;opacity:.15;}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">Inicio</a>
+  <a href="portada.html">Portada · Evoke Evol</a>
+  <a href="#cap1">Capítulo 1</a>
+  <a href="#terminal">Terminal Forense</a>
+  <a href="#ciudad">Ciudad-Malla</a>
+</nav>
+
+<svg class="bg" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4ea9ff"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <circle cx="800" cy="450" r="400" fill="none" stroke="url(#g1)" stroke-width="1" opacity=".3"/>
+  <circle cx="800" cy="450" r="200" fill="none" stroke="url(#g1)" stroke-width="1" opacity=".2"/>
+  <circle cx="800" cy="450" r="600" fill="none" stroke="url(#g1)" stroke-width="1" opacity=".1"/>
+</svg>
+
+<header>
+  <h1>Génesis y Catástrofe del Programa :Evoke Evol:</h1>
+  <h1 class="reflection">Genesis und Katastrophe des Programms :Evoke Evol:</h1>
+  <h2>Ecología de los Vectores · Imaginación Productiva</h2>
+  <h2 class="reflection">Ökologie der Vektoren · Produktive Einbildungskraft</h2>
+  <div class="subtitle">
+    ejercicios sinestésicos con SVG y WebkitAudio<br>
+    <small style="opacity:.65;">umbral entre literatura interactiva y ciberespacio · proyecto narrativo audiovisual</small>
+  </div>
+</header>
+
+<main>
+  <div class="card">
+    <a href="portada.html">Portada Animada · Evoke Evol</a>
+    <p style="font-size:.9rem;opacity:.8;margin-top:.7rem;">
+      Introducción del informe FLO 826 CHUT · moto, ciudad, tachikomas · cielo estático de Neuromancer.
+    </p>
+  </div>
+
+  <div class="card" id="cap1">
+    <a href="#">Capítulo 1 · Términos del Umbral</a>
+    <p style="font-size:.9rem;opacity:.8;margin-top:.7rem;">
+      Módulo narrativo interactivo en desarrollo: texto-terminal, símbolos emergentes y topología semántica.
+    </p>
+  </div>
+
+  <div class="card" id="terminal">
+    <a href="#">Terminal Forense (Evoke Logs)</a>
+    <p style="font-size:.9rem;opacity:.8;margin-top:.7rem;">
+      Lectura de registros cifrados del sistema :He/Automat: · Análisis de memoria sintética.
+    </p>
+  </div>
+
+  <div class="card" id="ciudad">
+    <a href="#">Ciudad-Malla · Entorno Sintético</a>
+    <p style="font-size:.9rem;opacity:.8;margin-top:.7rem;">
+      Render SVG interactivo · infraestructura neurourbana · tránsito de vectores lumínicos.
+    </p>
+  </div>
+</main>
+
+<footer>Hor Kardelj 2025-2026 | Eumeswil</footer>
+
+</body>
+</html>
