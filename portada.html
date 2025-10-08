@@ -83,9 +83,10 @@ svg{position:fixed;inset:0;width:100vw;height:100vh;display:block}
 
 <!-- UI -->
 <div id="ui">
+  <button id="backBtn" class="btn">← Inicio</button>
   <button id="playBtn" class="btn">▶ Audio</button>
   <button id="pauseBtn" class="btn">⏸</button>
-  <button id="panelBtn" class="btn">☰ Prólogo</button>
+  <button id="panelBtn" class="btn">CAP 1</button>
   <span class="badge">Proyecto-novela · SVG + WebAudio · v0.1</span>
 </div>
 <div id="credits">Hor Kardelj 2025-2026 | Eumeswil</div>
@@ -230,8 +231,8 @@ posición de reconocerla.
 
   <!-- Personajes-letra que flotan como hologramas -->
   <g id="glyphs">
-    <g id="He" transform="translate(1180,560)"><use href="#HeGlyph"/><text class="tag" x="0" y="28" text-anchor="middle">He</text></g>
-    <g id="Mi" transform="translate(260,560)"><use href="#MiGlyph"/><text class="tag" x="0" y="28" text-anchor="middle">Mi</text></g>
+    <g id="He" transform="translate(1180,560)"><use href="#HeGlyph"/><text class="tag" x="0" y="28" text-anchor="middle"></text></g>
+    <g id="Mi" transform="translate(260,560)"><use href="#MiGlyph"/><text class="tag" x="0" y="28" text-anchor="middle"></text></g>
   </g>
 
   <!-- scanline general -->
@@ -346,8 +347,13 @@ requestAnimationFrame(step);
 let ctx=null, master=null, mainGain=null, noiseNode=null, engine=null;
 let started=false;
 
+const backBtn=document.getElementById('backBtn');
 const playBtn=document.getElementById('playBtn');
 const pauseBtn=document.getElementById('pauseBtn');
+
+backBtn.onclick = ()=>{
+  window.location.href = 'index.html';
+};
 
 playBtn.onclick = async()=>{
   if(!ctx){
