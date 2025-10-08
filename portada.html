@@ -3,123 +3,530 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Génesis y Catástrofe del Programa :Evoke Evol:</title>
+<title>PORTADA — Génesis y Catástrofe del Programa :Evoke Evol:</title>
 <style>
 :root{
-  --bg:#0c0f14;
-  --emerald:#10b981;
-  --metablue:#4ea9ff;
-  --ochre:#cc7722;
-  --light:#e0f2ff;
+  --bg:#0b0f14;            /* fondo oscuro */
+  --ink:#d7e8ff;           /* tipografía UI */
+  --emerald:#10b981;       /* esmeralda */
+  --metablue:#4ea9ff;      /* azul metálico */
+  --ochre:#cc7722;         /* acento ocre */
+  --neon:#8be9fd;
+  --mag:#db4dff;
 }
-html,body{
-  margin:0;padding:0;height:100%;
-  background:radial-gradient(1600px 900px at 70% 10%, #1a2230 0%, var(--bg) 70%);
-  color:var(--light);font-family:'Segoe UI',system-ui,sans-serif;
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;}
+button{cursor:pointer}
+#ui{position:fixed;left:16px;top:16px;z-index:20;display:flex;gap:.5rem;align-items:center}
+.btn{
+  border:none;border-radius:12px;padding:.55rem .9rem;font-weight:700;letter-spacing:.3px;
+  background:linear-gradient(180deg,#1b2a3a,#0d1826);
+  color:#cfe8ff;box-shadow:0 0 0 1px rgba(78,169,255,.3),0 8px 24px rgba(0,0,0,.45),inset 0 0 16px rgba(16,185,129,.08)
 }
-nav{
-  position:fixed;top:0;left:0;width:100%;
-  background:rgba(0,0,0,.25);backdrop-filter:blur(8px);
-  padding:.8rem 0;text-align:center;
-  border-bottom:1px solid rgba(78,169,255,.2);
+.btn:hover{transform:translateY(-1px)}
+.badge{padding:.35rem .6rem;border-radius:999px;background:linear-gradient(90deg,rgba(204,119,34,.25),transparent);box-shadow:0 0 0 1px rgba(204,119,34,.4)}
+#credits{position:fixed;right:16px;bottom:10px;z-index:20;font-size:.85rem;opacity:.85}
+
+/* panel prólogo */
+#panel{
+  position:fixed;right:16px;top:16px;z-index:25;width:min(520px,calc(100vw - 32px));
+  background:rgba(8,14,22,.75);backdrop-filter:blur(6px);
+  border:1px solid rgba(78,169,255,.35);border-radius:14px;padding:14px 14px 12px 14px;
+  box-shadow:0 20px 50px rgba(0,0,0,.45), inset 0 0 24px rgba(16,185,129,.06)
 }
-nav a{
-  color:var(--metablue);margin:0 1rem;text-decoration:none;font-weight:600;
-  transition:color .2s;
+#panel h3{margin:.2rem 0 .5rem 0;color:var(--emerald);text-shadow:0 0 10px rgba(16,185,129,.4)}
+#panel pre{
+  white-space:pre-wrap;margin:0;max-height:38vh;overflow:auto;
+  font-family:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size:.95rem;line-height:1.25;color:#cfe8ff
 }
-nav a:hover{color:var(--emerald);}
-header{text-align:center;padding:6rem 1rem 2rem;line-height:1.2;}
-h1{font-size:2.4rem;color:var(--emerald);text-transform:uppercase;
-    letter-spacing:1px;text-shadow:0 0 12px rgba(16,185,129,.4);}
-h1.reflection{transform:scaleY(-1);opacity:.28;color:var(--metablue);
-    filter:blur(1px);margin-top:-.5rem;}
-h2{font-size:1.4rem;color:var(--metablue);margin-top:1rem;
-    text-shadow:0 0 10px rgba(78,169,255,.4);}
-h2.reflection{transform:scaleY(-1);opacity:.25;filter:blur(1px);margin-top:-.3rem;}
-.subtitle{font-size:1rem;opacity:.8;margin-top:2rem;letter-spacing:.4px;color:var(--ochre);}
-main{display:flex;justify-content:center;flex-wrap:wrap;gap:2rem;margin-top:3.5rem;}
-.card{
-  width:320px;padding:2rem;background:rgba(255,255,255,.05);
-  border-radius:16px;text-align:center;backdrop-filter:blur(6px);
-  box-shadow:0 0 18px rgba(78,169,255,.15),inset 0 0 24px rgba(16,185,129,.05);
-  transition:transform .3s ease,box-shadow .3s ease;
+#panel .mini{display:flex;gap:.5rem;align-items:center;justify-content:space-between;margin-top:.4rem}
+.link-like{color:var(--metablue);text-decoration:none;border-bottom:1px dashed rgba(78,169,255,.5)}
+.link-like:hover{color:#b8dcff}
+
+/* título espejo */
+#headerTitle{
+  position:fixed;left:50%;transform:translateX(-50%);top:8px;text-align:center;z-index:12;line-height:1.1
 }
-.card:hover{transform:translateY(-6px);
-  box-shadow:0 0 24px rgba(78,169,255,.3),inset 0 0 30px rgba(16,185,129,.15);}
-.card a{text-decoration:none;color:var(--emerald);font-weight:600;font-size:1.1rem;}
-.card a:hover{color:var(--metablue);}
-footer{
-  position:fixed;bottom:0;left:0;right:0;
-  text-align:center;padding:.8rem;font-size:.9rem;color:#9db3c5;
-  background:linear-gradient(180deg,transparent,rgba(0,0,0,.4));
+#headerTitle .a{font-size:1rem;letter-spacing:.5px;color:var(--ochre);opacity:.9}
+#headerTitle .b{font-size:1.4rem;font-weight:800;color:var(--emerald);text-shadow:0 0 12px rgba(16,185,129,.35)}
+#headerTitle .b.ref{transform:scaleY(-1);opacity:.28;color:var(--metablue);filter:blur(1px);}
+
+/* SVG full */
+svg{position:fixed;inset:0;width:100vw;height:100vh;display:block}
+
+/* pista (asfalto) */
+#road{fill:url(#roadGrad)}
+#laneGlow{stroke:url(#laneGrad);stroke-width:2;opacity:.85;filter:url(#glowBlue)}
+.scan{opacity:.18}
+
+/* HUD etiquetas de los personajes-letra */
+.tag{
+  font-family:"IBM Plex Mono", ui-monospace, monospace;
+  font-size:12px; fill:var(--ink); opacity:.85;
 }
-svg.bg{position:fixed;inset:0;width:100%;height:100%;z-index:-1;opacity:.15;}
+
+/* moteado 8bit */
+.grain{position:fixed;inset:0;pointer-events:none;opacity:.14;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.04) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(0deg,  rgba(255,255,255,.03) 0 1px, transparent 1px 3px);
+}
+
+/* tooltip breve */
+.hint{
+  position:fixed;left:16px;bottom:52px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);
+  color:#cfe8ff;padding:.4rem .6rem;border-radius:10px;font-size:.85rem;z-index:30
+}
 </style>
 </head>
 <body>
 
-<nav>
-  <a href="index.html">Inicio</a>
-  <a href="portada.html">Portada · Evoke Evol</a>
-  <a href="#cap1">Capítulo 1</a>
-  <a href="#terminal">Terminal Forense</a>
-  <a href="#ciudad">Ciudad-Malla</a>
-</nav>
+<!-- UI -->
+<div id="ui">
+  <button id="playBtn" class="btn">▶ Audio</button>
+  <button id="pauseBtn" class="btn">⏸</button>
+  <button id="panelBtn" class="btn">☰ Prólogo</button>
+  <span class="badge">Proyecto-novela · SVG + WebAudio · v0.1</span>
+</div>
+<div id="credits">Hor Kardelj 2025-2026 | Eumeswil</div>
 
-<svg class="bg" viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
+<div id="headerTitle">
+  <div class="a">ejercicios sinestésicos con SVG y WebkitAudio</div>
+  <div class="b">Ecología de los Vectores · Imaginación Productiva</div>
+  <div class="b ref">Ökologie der Vektoren · Produktive Einbildungskraft</div>
+</div>
+
+<!-- Panel con el texto de inicio -->
+<div id="panel">
+  <h3>Génesis y Catástrofe del Programa :Evoke Evol:</h3>
+  <pre id="prologo">
+A     Génesis y Catástrofe del Programa :Evoke Evol:
+[U]-exküll  :mwm:
+
+[Nota]: Para ordenar este informe sobre FLO 826 CHUT [M]+i/[H]-eà→[He Automat] no
+existe otra manera que comenzar por la estructura ata-vística de inteligencia artificial
+perversátil :Evoke Evol:, multiplicándose en tetrominós donde el poliominó de
+poliominós [H]-e/[M]+i se entretuvo, de la cual es preciso estar alejado para estar en
+posición de reconocerla.
+  </pre>
+  <div class="mini">
+    <span>Inicio del informe · <em>estado: transmisión en curso</em></span>
+    <a class="link-like" href="#caligrama">Ir al Caligrama “sé”</a>
+  </div>
+</div>
+
+<div class="hint">Controles: Click/Touch activa audio · ←/→ cambia pista de carril · Espacio pausa/reanuda</div>
+
+<!-- C A M P O   E S C É N I C O -->
+<svg id="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-label="Portada animada: moto hacia ciudad, cielo estático, tachikomas">
   <defs>
-    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#4ea9ff"/>
-      <stop offset="100%" stop-color="#10b981"/>
+    <!-- Cielo “televisión en canal muerto” -->
+    <filter id="static">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" stitchTiles="stitch" result="n"/>
+      <feComponentTransfer>
+        <feFuncR type="table" tableValues="0 1"/>
+        <feFuncG type="table" tableValues="0 1"/>
+        <feFuncB type="table" tableValues="0 1"/>
+      </feComponentTransfer>
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/>
+      <feBlend in="SourceGraphic" in2="n" mode="screen"/>
+    </filter>
+
+    <!-- Animación de la estática -->
+    <animate xlink:href="#skyNoise" attributeName="seed" from="1" to="999" dur="10s" repeatCount="indefinite"/>
+
+    <!-- Brillos -->
+    <filter id="glowBlue"><feGaussianBlur stdDeviation="2.2" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="glowGreen"><feGaussianBlur stdDeviation="2.2" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="neon"><feGaussianBlur stdDeviation="1.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+
+    <!-- Gradientes -->
+    <linearGradient id="roadGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0b1520"/><stop offset="100%" stop-color="#02080e"/>
     </linearGradient>
+    <linearGradient id="laneGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="rgba(78,169,255,.95)"/>
+      <stop offset="100%" stop-color="rgba(16,185,129,.95)"/>
+    </linearGradient>
+
+    <!-- Patrón scanline sutil -->
+    <pattern id="scan" width="6" height="6" patternUnits="userSpaceOnUse">
+      <rect width="6" height="6" fill="transparent"/>
+      <rect y="0" width="6" height="1" fill="rgba(255,255,255,.05)"/>
+    </pattern>
+
+    <!-- Símbolo Tachikoma-like -->
+    <g id="tachi">
+      <circle cx="0" cy="0" r="12" fill="#4ea9ff" filter="url(#neon)"/>
+      <circle cx="-9" cy="10" r="6" fill="#10b981" opacity=".9"/>
+      <circle cx="9" cy="10" r="6" fill="#10b981" opacity=".9"/>
+      <circle cx="-11" cy="-6" r="4" fill="#8be9fd" opacity=".9"/>
+      <circle cx="11" cy="-6" r="4" fill="#8be9fd" opacity=".9"/>
+      <rect x="-6" y="12" width="12" height="3" fill="#cc7722" opacity=".8"/>
+    </g>
+
+    <!-- Símbolo Moto -->
+    <g id="moto" transform="scale(1)">
+      <rect x="-24" y="-8" width="48" height="16" rx="8" fill="#10b981" filter="url(#glowGreen)"/>
+      <circle cx="-16" cy="16" r="14" fill="#1a2634" stroke="#4ea9ff" stroke-width="3"/>
+      <circle cx="16" cy="16" r="14" fill="#1a2634" stroke="#4ea9ff" stroke-width="3"/>
+      <rect x="-22" y="-20" width="24" height="10" fill="#4ea9ff"/>
+      <polygon points="6,-20 26,-8 8,-8" fill="#cc7722"/>
+      <rect x="-2" y="-6" width="10" height="6" fill="#8be9fd"/>
+      <rect x="-40" y="-2" width="10" height="3" fill="#8be9fd"/>
+    </g>
+
+    <!-- Letras-personaje -->
+    <g id="HeGlyph">
+      <rect x="-16" y="-20" width="32" height="34" rx="4" fill="#102030" stroke="#4ea9ff" opacity=".9"/>
+      <text x="0" y="5" text-anchor="middle" font-family="monospace" font-size="22" fill="#cfe8ff">He</text>
+    </g>
+    <g id="MiGlyph">
+      <rect x="-16" y="-20" width="32" height="34" rx="4" fill="#102030" stroke="#10b981" opacity=".9"/>
+      <text x="0" y="5" text-anchor="middle" font-family="monospace" font-size="22" fill="#d5ffee">Mi</text>
+    </g>
   </defs>
-  <circle cx="800" cy="450" r="400" fill="none" stroke="url(#g1)" stroke-width="1" opacity=".3"/>
-  <circle cx="800" cy="450" r="200" fill="none" stroke="url(#g1)" stroke-width="1" opacity=".2"/>
-  <circle cx="800" cy="450" r="600" fill="none" stroke="url(#g1)" stroke-width="1" opacity=".1"/>
+
+  <!-- CIELO estático -->
+  <g id="sky" filter="url(#static)">
+    <rect width="1600" height="520" fill="#0e1520"/>
+    <rect id="skyNoise" width="1600" height="520" fill="url(#scan)" opacity=".2"/>
+  </g>
+
+  <!-- CIUDAD: capas de rascacielos -->
+  <g id="city">
+    <!-- Fondo -->
+    <g opacity=".45">
+      <!-- edificios procedurales simples -->
+      <rect x="20" y="240" width="70" height="260" fill="#0d1b2a"/>
+      <rect x="120" y="210" width="90" height="290" fill="#0f2132"/>
+      <rect x="240" y="190" width="120" height="310" fill="#0f2336"/>
+      <rect x="400" y="230" width="110" height="270" fill="#0d1b2a"/>
+      <rect x="540" y="200" width="130" height="300" fill="#0f2132"/>
+      <rect x="700" y="180" width="140" height="320" fill="#0f2336"/>
+      <rect x="880" y="220" width="120" height="280" fill="#0d1b2a"/>
+      <rect x="1040" y="195" width="110" height="305" fill="#0f2132"/>
+      <rect x="1180" y="210" width="140" height="290" fill="#0f2336"/>
+      <rect x="1360" y="200" width="120" height="300" fill="#0d1b2a"/>
+    </g>
+    <!-- Ventanas / neón -->
+    <g id="lights" filter="url(#neon)"></g>
+  </g>
+
+  <!-- CARRETERA (perspectiva simple) -->
+  <g id="roadGroup">
+    <polygon id="road" points="760,520 840,520 1280,900 320,900"/>
+    <!-- líneas de carril -->
+    <g id="lanes" filter="url(#glowBlue)"></g>
+  </g>
+
+  <!-- MOTO protagonista -->
+  <g id="rider" transform="translate(800,600)">
+    <use href="#moto"/>
+    <text class="tag" x="0" y="-28" text-anchor="middle">[He Automat] · portando informe</text>
+  </g>
+
+  <!-- TACHIKOMAS -->
+  <g id="bots"></g>
+
+  <!-- Personajes-letra que flotan como hologramas -->
+  <g id="glyphs">
+    <g id="He" transform="translate(1180,560)"><use href="#HeGlyph"/><text class="tag" x="0" y="28" text-anchor="middle">He (hombre)</text></g>
+    <g id="Mi" transform="translate(260,560)"><use href="#MiGlyph"/><text class="tag" x="0" y="28" text-anchor="middle">Mi (mujer)</text></g>
+  </g>
+
+  <!-- scanline general -->
+  <rect class="scan" x="0" y="0" width="1600" height="900" fill="url(#scan)"/>
 </svg>
 
-<header>
-  <h1>Génesis y Catástrofe del Programa :Evoke Evol:</h1>
-  <h1 class="reflection">Genesis und Katastrophe des Programms :Evoke Evol:</h1>
-  <h2>Ecología de los Vectores · Imaginación Productiva</h2>
-  <h2 class="reflection">Ökologie der Vektoren · Produktive Einbildungskraft</h2>
-  <div class="subtitle">
-    ejercicios sinestésicos con SVG y WebkitAudio<br>
-    <small style="opacity:.65;">umbral entre literatura interactiva y ciberespacio · proyecto narrativo audiovisual</small>
-  </div>
-</header>
+<div class="grain" aria-hidden="true"></div>
 
-<main>
-  <div class="card">
-    <a href="portada.html">Portada Animada · Evoke Evol</a>
-    <p style="font-size:.9rem;opacity:.8;margin-top:.7rem;">
-      Introducción del informe FLO 826 CHUT · moto, ciudad, tachikomas · cielo estático de Neuromancer.
-    </p>
-  </div>
+<script>
+/* ===========================
+   A N I M A C I Ó N   S V G
+   =========================== */
+const W = 1600, H = 900;
+const scene = document.getElementById('scene');
+const lights = document.getElementById('lights');
+const lanes = document.getElementById('lanes');
+const rider = document.getElementById('rider');
+const bots = document.getElementById('bots');
+const panel = document.getElementById('panel');
+const panelBtn = document.getElementById('panelBtn');
 
-  <div class="card" id="cap1">
-    <a href="#">Capítulo 1 · Términos del Umbral</a>
-    <p style="font-size:.9rem;opacity:.8;margin-top:.7rem;">
-      Módulo narrativo interactivo en desarrollo: texto-terminal, símbolos emergentes y topología semántica.
-    </p>
-  </div>
+panelBtn.onclick = () => panel.style.display = (panel.style.display==='none'?'block':'none');
 
-  <div class="card" id="terminal">
-    <a href="#">Terminal Forense (Evoke Logs)</a>
-    <p style="font-size:.9rem;opacity:.8;margin-top:.7rem;">
-      Lectura de registros cifrados del sistema :He/Automat: · Análisis de memoria sintética.
-    </p>
-  </div>
+/* Ventanas de ciudad */
+(function buildLights(){
+  const rng = (a,b)=>a+Math.random()*(b-a);
+  for(let i=0;i<420;i++){
+    const x = Math.random()*1600;
+    const h = 180 + Math.random()*300;
+    const y = 520 - h + Math.random()*h;
+    const w = 2 + Math.random()*5;
+    const r = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    r.setAttribute('x', x.toFixed(1));
+    r.setAttribute('y', y.toFixed(1));
+    r.setAttribute('width', w.toFixed(1));
+    r.setAttribute('height', (2+Math.random()*8).toFixed(1));
+    r.setAttribute('fill', Math.random()<0.6 ? '#4ea9ff' : '#10b981');
+    r.setAttribute('opacity', (0.35 + Math.random()*0.55).toFixed(2));
+    lights.appendChild(r);
+  }
+})();
 
-  <div class="card" id="ciudad">
-    <a href="#">Ciudad-Malla · Entorno Sintético</a>
-    <p style="font-size:.9rem;opacity:.8;margin-top:.7rem;">
-      Render SVG interactivo · infraestructura neurourbana · tránsito de vectores lumínicos.
-    </p>
-  </div>
-</main>
+/* Líneas de carril en perspectiva */
+(function buildLanes(){
+  for(let i=0;i<12;i++){
+    const path = document.createElementNS('http://www.w3.org/2000/svg','line');
+    path.setAttribute('id','laneGlow');
+    lanes.appendChild(path);
+  }
+})();
 
-<footer>Hor Kardelj 2025-2026 | Eumeswil</footer>
+/* Tachikomas circulando */
+const botCount = 12;
+for(let i=0;i<botCount;i++){
+  const b = document.createElementNS('http://www.w3.org/2000/svg','use');
+  b.setAttribute('href','#tachi');
+  bots.appendChild(b);
+}
 
+/* Estado moto / input */
+let laneOffset = 0; // -1 izquierda, 0 centro, 1 derecha (virtual)
+document.addEventListener('keydown', e=>{
+  if(e.key==='ArrowLeft') laneOffset = Math.max(-1, laneOffset-1);
+  if(e.key==='ArrowRight') laneOffset = Math.min(1, laneOffset+1);
+  if(e.key===' ') togglePause();
+});
+
+/* Anim loop */
+let t0 = performance.now(), paused=false;
+function togglePause(){ paused=!paused; if(!paused) requestAnimationFrame(step); }
+function step(now){
+  if(paused) return;
+  const dt = Math.min(32, now - t0); t0 = now;
+  const time = now*0.001;
+
+  // carriles (simular movimiento hacia la ciudad)
+  const baseY = 540, van = 120; // velocidad
+  const lines = lanes.children;
+  for(let i=0;i<lines.length;i++){
+    const seg = 80 + i*20;
+    const y1 = baseY + ((time*van + i*120) % 460);
+    const scale = (y1 - baseY) / 360 + 0.2;
+    const xCenter = 800 + laneOffset*40;
+    const spread = 260 * scale;
+    lines[i].setAttribute('x1', (xCenter - spread).toFixed(1));
+    lines[i].setAttribute('x2', (xCenter + spread).toFixed(1));
+    lines[i].setAttribute('y1', y1.toFixed(1));
+    lines[i].setAttribute('y2', y1.toFixed(1));
+  }
+
+  // moto levísimo bamboleo
+  const mx = 800 + laneOffset*60 + Math.sin(time*2.5)*4;
+  const my = 600 + Math.cos(time*3.2)*2;
+  rider.setAttribute('transform', `translate(${mx.toFixed(1)},${my.toFixed(1)})`);
+
+  // bots: órbitas suaves
+  for(let i=0;i<botCount;i++){
+    const ang = time*0.4 + i*(Math.PI*2/botCount);
+    const radius = 180 + 80*Math.sin(time*0.3+i);
+    const bx = 800 + Math.cos(ang)*radius;
+    const by = 520 - 40 + Math.sin(ang*1.3)*60;
+    bots.children[i].setAttribute('transform', `translate(${bx.toFixed(1)},${by.toFixed(1)})`);
+  }
+
+  requestAnimationFrame(step);
+}
+requestAnimationFrame(step);
+
+/* ===========================
+   A U D I O   W e b A u d i o
+   =========================== */
+let ctx=null, master=null, mainGain=null, noiseNode=null, engine=null;
+let started=false;
+
+const playBtn=document.getElementById('playBtn');
+const pauseBtn=document.getElementById('pauseBtn');
+
+playBtn.onclick = async()=>{
+  if(!ctx){
+    ctx = new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'});
+    master = ctx.createGain(); master.gain.value = 0.85; master.connect(ctx.destination);
+    mainGain = ctx.createGain(); mainGain.gain.value = 0.9; mainGain.connect(master);
+    buildScore(); // compone y programa
+    buildNoise(); // cielo estático
+    buildEngine(); // motor
+  }
+  if(ctx.state==='suspended') await ctx.resume();
+  started=true;
+};
+
+pauseBtn.onclick = async()=>{
+  if(!ctx) return;
+  if(ctx.state==='running'){ await ctx.suspend(); } else { await ctx.resume(); }
+};
+
+/* Melodía (~2 min) — original estilo “hero synth” */
+function buildScore(){
+  const tempo = 112; // BPM
+  const beat = 60/tempo;
+  const start = ctx.currentTime + 0.05;
+
+  // progresión distinta (no Guile): i–VI–III–VII en Am natural -> Am–F–C–G
+  const prog = [
+    {root:57, name:'Am'}, {root:53, name:'F'},
+    {root:60, name:'C'},  {root:55, name:'G'}
+  ];
+
+  // CAPA 1: Bajo
+  scheduleBass(start, prog, beat);
+
+  // CAPA 2: Acordes/pad
+  schedulePad(start, prog, beat);
+
+  // CAPA 3: Lead 8-bit (saw/square)
+  scheduleLead(start + 4*beat, beat);
+
+  // CAPA 4: Arpeggios chiptune
+  scheduleArp(start + 8*beat, prog, beat);
+}
+
+/* utilidades MIDI */
+function midi2freq(m){ return 440*Math.pow(2,(m-69)/12); }
+
+function osc(type, freq, gain){
+  const o = ctx.createOscillator(); o.type = type; o.frequency.value = freq;
+  const g = ctx.createGain(); g.gain.value = gain;
+  o.connect(g).connect(mainGain);
+  return {o,g};
+}
+
+/* Envolvente breve */
+function env(g, t0, a=.01, d=.12, s=.22, r=.25, peak=0.8){
+  g.gain.cancelScheduledValues(t0);
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.linearRampToValueAtTime(peak, t0+a);
+  g.gain.exponentialRampToValueAtTime(s*peak, t0+a+d);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0+a+d+r);
+}
+
+/* Bajo */
+function scheduleBass(t, prog, beat){
+  let T = t;
+  for(let bar=0; bar<16; bar++){
+    const p = prog[bar%prog.length];
+    for(let s=0;s<4;s++){
+      const f = midi2freq(p.root + (s===3? -12:0)); // a veces octava baja
+      const {o,g} = osc('square', f, 0.5);
+      env(g, T + s*beat, .005,.08,.18,.18,.7);
+      o.start(T + s*beat);
+      o.stop (T + s*beat + .45);
+    }
+    T += 4*beat;
+  }
+}
+
+/* Pad */
+function schedulePad(t, prog, beat){
+  let T = t;
+  for(let bar=0; bar<16; bar++){
+    const p = prog[bar%prog.length];
+    const notes = [0,7,12].map(semi => midi2freq(p.root+semi));
+    const {o:oa, g:ga} = osc('triangle', notes[0], 0.12);
+    const {o:ob, g:gb} = osc('triangle', notes[1], 0.10);
+    const {o:oc, g:gc} = osc('triangle', notes[2], 0.08);
+    ga.gain.setValueAtTime(0.0001, T);
+    gb.gain.setValueAtTime(0.0001, T);
+    gc.gain.setValueAtTime(0.0001, T);
+    ga.gain.linearRampToValueAtTime(0.18, T+.2);
+    gb.gain.linearRampToValueAtTime(0.16, T+.22);
+    gc.gain.linearRampToValueAtTime(0.14, T+.24);
+    ga.gain.exponentialRampToValueAtTime(0.0001, T+4*beat-.05);
+    gb.gain.exponentialRampToValueAtTime(0.0001, T+4*beat-.05);
+    gc.gain.exponentialRampToValueAtTime(0.0001, T+4*beat-.05);
+    oa.start(T); ob.start(T); oc.start(T);
+    oa.stop(T+4*beat-.04); ob.stop(T+4*beat-.04); oc.stop(T+4*beat-.04);
+    T += 4*beat;
+  }
+}
+
+/* Lead */
+function scheduleLead(t, beat){
+  // motivo heroico (propio):
+  // grados: 0 2 4 5 | 7 5 4 2 | 0 2 4 5 | 7 9 7 5 en A eólico
+  const deg = [0,2,4,5, 7,5,4,2, 0,2,4,5, 7,9,7,5];
+  const base = 69-12; // A4 -> A3
+  for(let i=0;i<deg.length;i++){
+    const tt = t + i*(beat/2);
+    const n = base + deg[i];
+    const {o,g} = osc('square', midi2freq(n), 0.35);
+    const vib = ctx.createOscillator(); vib.type='sine'; vib.frequency.value=6;
+    const vGain = ctx.createGain(); vGain.gain.value=12; vib.connect(vGain); vGain.connect(o.frequency);
+    vib.start(tt); vib.stop(tt + beat*0.9);
+    env(g, tt, .005,.06,.25,.12,.9);
+    o.start(tt); o.stop(tt + beat*0.9);
+  }
+}
+
+/* Arpegios */
+function scheduleArp(t, prog, beat){
+  let T=t;
+  for(let bar=0; bar<16; bar++){
+    const p=prog[bar%prog.length];
+    const arp = [0,7,12,19, 12,7,0,7]; // up-down
+    for(let s=0;s<arp.length;s++){
+      const tt = T + s*(beat/2);
+      const {o,g} = osc('square', midi2freq(p.root+arp[s]), 0.18);
+      env(g, tt, .003,.05,.15,.08,.7);
+      o.start(tt); o.stop(tt + beat*.35);
+    }
+    T += 4*beat;
+  }
+}
+
+/* Ruido del cielo (ambiente) */
+function buildNoise(){
+  const buffer = ctx.createBuffer(1, ctx.sampleRate*2, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for(let i=0;i<data.length;i++){ data[i]=(Math.random()*2-1)*0.2; }
+  noiseNode = ctx.createBufferSource();
+  noiseNode.buffer = buffer; noiseNode.loop = true;
+  const g = ctx.createGain(); g.gain.value = 0.18;
+  noiseNode.connect(g).connect(master); noiseNode.start();
+}
+
+/* Zumbido de motor (bajo sutil) */
+function buildEngine(){
+  const {o,g} = osc('sawtooth', 90, 0.12);
+  engine = o; const gg = g;
+  gg.gain.setValueAtTime(0.0001, ctx.currentTime);
+  gg.gain.linearRampToValueAtTime(0.12, ctx.currentTime + .4);
+  // LFO
+  const lfo = ctx.createOscillator(); lfo.type='sine'; lfo.frequency.value=1.2;
+  const lg = ctx.createGain(); lg.gain.value=6; lfo.connect(lg); lg.connect(engine.frequency);
+  lfo.start(); engine.start();
+}
+
+/* ===========================
+   F X   D E   I M P A C T O S
+   (cuando cambiamos de carril)
+   =========================== */
+document.addEventListener('keydown', e=>{
+  if(!ctx || ctx.state!=='running') return;
+  if(e.key==='ArrowLeft' || e.key==='ArrowRight'){
+    const now = ctx.currentTime;
+    // "click" 8-bit corto
+    const noise = ctx.createBufferSource();
+    const buf = ctx.createBuffer(1, 600, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for(let i=0;i<d.length;i++){ d[i] = (Math.random()*2-1)*Math.pow(1-i/d.length,3)*0.8; }
+    const g = ctx.createGain(); g.gain.value=.18;
+    noise.buffer=buf; noise.connect(g).connect(master);
+    noise.start(now); noise.stop(now+.07);
+  }
+});
+</script>
 </body>
 </html>
