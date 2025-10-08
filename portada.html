@@ -379,23 +379,60 @@ function buildScore(){
   const beat = 60/tempo;
   const start = ctx.currentTime + 0.05;
 
-  // progresión distinta (no Guile): i–VI–III–VII en Am natural -> Am–F–C–G
-  const prog = [
+  // progresiones para verso y coro
+  const verseProgression = [
     {root:57, name:'Am'}, {root:53, name:'F'},
     {root:60, name:'C'},  {root:55, name:'G'}
   ];
+  const chorusProgression = [
+    {root:53, name:'F'},  {root:60, name:'C'},
+    {root:55, name:'G'},  {root:57, name:'Am'}
+  ];
 
-  // CAPA 1: Bajo
-  scheduleBass(start, prog, beat);
+  // ESTRUCTURA: Verso (30s) + Coro (30s) + Verso (30s) + Coro (30s) = ~2 minutos
+  const verseDuration = 30; // segundos
+  const chorusDuration = 30; // segundos
+  
+  // VERSO 1 (0-30s)
+  scheduleSection('verse', start, verseDuration, verseProgression, beat, 1);
+  
+  // CORO 1 (30-60s)  
+  scheduleSection('chorus', start + verseDuration, chorusDuration, chorusProgression, beat, 1);
+  
+  // VERSO 2 (60-90s)
+  scheduleSection('verse', start + verseDuration + chorusDuration, verseDuration, verseProgression, beat, 2);
+  
+  // CORO 2 (90-120s)
+  scheduleSection('chorus', start + verseDuration*2 + chorusDuration, chorusDuration, chorusProgression, beat, 2);
 
-  // CAPA 2: Acordes/pad
-  schedulePad(start, prog, beat);
+  // Batería continua
+  scheduleDrums(start, 120, beat);
+  
+  // Sonidos de tachikomas dinámicos
+  scheduleTachikomasSounds(start, 120);
+}
 
-  // CAPA 3: Lead 8-bit (saw/square)
-  scheduleLead(start + 4*beat, beat);
-
-  // CAPA 4: Arpeggios chiptune
-  scheduleArp(start + 8*beat, prog, beat);
+/* Programar una sección completa (verso o coro) */
+function scheduleSection(type, startTime, duration, progression, beat, iteration){
+  const barsInSection = Math.floor(duration / (4 * beat)); // cuántos compases caben
+  
+  // Bajo
+  scheduleBass(startTime, progression, beat, barsInSection);
+  
+  // Pad (más intenso en coros)
+  const padGain = type === 'chorus' ? 1.3 : 1.0;
+  schedulePad(startTime, progression, beat, barsInSection, padGain);
+  
+  // Lead (melodía diferente para verso vs coro)
+  if(type === 'verse'){
+    scheduleVerseLead(startTime, beat, barsInSection, iteration);
+  } else {
+    scheduleChorusLead(startTime, beat, barsInSection, iteration);
+  }
+  
+  // Arpeggios (más activos en coro)
+  const arpDensity = type === 'chorus' ? 2 : 1;
+  scheduleArp(startTime, progression, beat, barsInSection, arpDensity);
 }
 
 /* utilidades MIDI */
@@ -418,9 +455,9 @@ function env(g, t0, a=.01, d=.12, s=.22, r=.25, peak=0.8){
 }
 
 /* Bajo */
-function scheduleBass(t, prog, beat){
+function scheduleBass(t, prog, beat, bars = 16){
   let T = t;
-  for(let bar=0; bar<16; bar++){
+  for(let bar=0; bar<bars; bar++){
     const p = prog[bar%prog.length];
     for(let s=0;s<4;s++){
       const f = midi2freq(p.root + (s===3? -12:0)); // a veces octava baja
@@ -434,20 +471,20 @@ function scheduleBass(t, prog, beat){
 }
 
 /* Pad */
-function schedulePad(t, prog, beat){
+function schedulePad(t, prog, beat, bars = 16, gainMultiplier = 1.0){
   let T = t;
-  for(let bar=0; bar<16; bar++){
+  for(let bar=0; bar<bars; bar++){
     const p = prog[bar%prog.length];
     const notes = [0,7,12].map(semi => midi2freq(p.root+semi));
-    const {o:oa, g:ga} = osc('triangle', notes[0], 0.12);
-    const {o:ob, g:gb} = osc('triangle', notes[1], 0.10);
-    const {o:oc, g:gc} = osc('triangle', notes[2], 0.08);
+    const {o:oa, g:ga} = osc('triangle', notes[0], 0.12 * gainMultiplier);
+    const {o:ob, g:gb} = osc('triangle', notes[1], 0.10 * gainMultiplier);
+    const {o:oc, g:gc} = osc('triangle', notes[2], 0.08 * gainMultiplier);
     ga.gain.setValueAtTime(0.0001, T);
     gb.gain.setValueAtTime(0.0001, T);
     gc.gain.setValueAtTime(0.0001, T);
-    ga.gain.linearRampToValueAtTime(0.18, T+.2);
-    gb.gain.linearRampToValueAtTime(0.16, T+.22);
-    gc.gain.linearRampToValueAtTime(0.14, T+.24);
+    ga.gain.linearRampToValueAtTime(0.18 * gainMultiplier, T+.2);
+    gb.gain.linearRampToValueAtTime(0.16 * gainMultiplier, T+.22);
+    gc.gain.linearRampToValueAtTime(0.14 * gainMultiplier, T+.24);
     ga.gain.exponentialRampToValueAtTime(0.0001, T+4*beat-.05);
     gb.gain.exponentialRampToValueAtTime(0.0001, T+4*beat-.05);
     gc.gain.exponentialRampToValueAtTime(0.0001, T+4*beat-.05);
@@ -475,15 +512,68 @@ function scheduleLead(t, beat){
   }
 }
 
+/* Melodía del verso (más contemplativa) */
+function scheduleVerseLead(t, beat, bars, iteration){
+  // Melodía verse: más suave, contemplativa
+  const verseDegrees = iteration === 1 ? 
+    [0,2,4,2, 0,-2,0,2, 4,2,0,2, 4,5,4,2] : // primera vez
+    [7,5,4,5, 7,9,7,5, 4,5,7,5, 4,2,0,2]; // repetición con variación
+  
+  const base = 69-12; // A4 -> A3
+  const totalNotes = Math.min(verseDegrees.length, bars * 4);
+  
+  for(let i=0; i<totalNotes; i++){
+    const tt = t + i*(beat);
+    const n = base + verseDegrees[i];
+    const {o,g} = osc('square', midi2freq(n), 0.28);
+    
+    // Vibrato más sutil en verso
+    const vib = ctx.createOscillator(); vib.type='sine'; vib.frequency.value=4;
+    const vGain = ctx.createGain(); vGain.gain.value=8; 
+    vib.connect(vGain); vGain.connect(o.frequency);
+    vib.start(tt); vib.stop(tt + beat*0.85);
+    
+    env(g, tt, .008,.08,.3,.15,.85);
+    o.start(tt); o.stop(tt + beat*0.85);
+  }
+}
+
+/* Melodía del coro (más épica) */
+function scheduleChorusLead(t, beat, bars, iteration){
+  // Melodía chorus: más intensa y heroica
+  const chorusDegrees = iteration === 1 ?
+    [7,9,12,9, 7,5,7,9, 12,14,12,9, 7,5,4,5] : // primera vez
+    [12,14,16,14, 12,9,12,14, 16,17,16,14, 12,9,7,9]; // repetición más alta
+  
+  const base = 69-12; // A4 -> A3
+  const totalNotes = Math.min(chorusDegrees.length, bars * 4);
+  
+  for(let i=0; i<totalNotes; i++){
+    const tt = t + i*(beat);
+    const n = base + chorusDegrees[i];
+    const {o,g} = osc('square', midi2freq(n), 0.42);
+    
+    // Vibrato más intenso en coro
+    const vib = ctx.createOscillator(); vib.type='sine'; vib.frequency.value=6.5;
+    const vGain = ctx.createGain(); vGain.gain.value=15; 
+    vib.connect(vGain); vGain.connect(o.frequency);
+    vib.start(tt); vib.stop(tt + beat*0.9);
+    
+    env(g, tt, .005,.06,.25,.12,1.0);
+    o.start(tt); o.stop(tt + beat*0.9);
+  }
+}
+
 /* Arpegios */
-function scheduleArp(t, prog, beat){
+function scheduleArp(t, prog, beat, bars = 16, density = 1){
   let T=t;
-  for(let bar=0; bar<16; bar++){
+  for(let bar=0; bar<bars; bar++){
     const p=prog[bar%prog.length];
     const arp = [0,7,12,19, 12,7,0,7]; // up-down
-    for(let s=0;s<arp.length;s++){
-      const tt = T + s*(beat/2);
-      const {o,g} = osc('square', midi2freq(p.root+arp[s]), 0.18);
+    const notes = density === 2 ? arp.concat([19,16,12,9]) : arp; // más denso en coro
+    for(let s=0;s<notes.length;s++){
+      const tt = T + s*(beat/(2*density));
+      const {o,g} = osc('square', midi2freq(p.root+notes[s]), 0.18);
       env(g, tt, .003,.05,.15,.08,.7);
       o.start(tt); o.stop(tt + beat*.35);
     }
@@ -500,6 +590,116 @@ function buildNoise(){
   noiseNode.buffer = buffer; noiseNode.loop = true;
   const g = ctx.createGain(); g.gain.value = 0.18;
   noiseNode.connect(g).connect(master); noiseNode.start();
+}
+
+/* Batería 8-bit estilo videojuego */
+function scheduleDrums(startTime, duration, beat){
+  let T = startTime;
+  const endTime = startTime + duration;
+  
+  while(T < endTime){
+    // Kick en tiempos 1 y 3
+    scheduleDrumHit('kick', T, 0.35);
+    scheduleDrumHit('kick', T + 2*beat, 0.3);
+    
+    // Snare en tiempos 2 y 4
+    scheduleDrumHit('snare', T + beat, 0.25);
+    scheduleDrumHit('snare', T + 3*beat, 0.25);
+    
+    // Hi-hat en contratiempos
+    for(let i=0; i<8; i++){
+      scheduleDrumHit('hihat', T + i*(beat/2), 0.12);
+    }
+    
+    T += 4*beat; // siguiente compás
+  }
+}
+
+function scheduleDrumHit(type, time, gain){
+  if(type === 'kick'){
+    // Kick: frecuencia baja con envelope rápido
+    const {o,g} = osc('sine', 60, gain);
+    o.frequency.exponentialRampToValueAtTime(30, time + 0.1);
+    env(g, time, .001,.02,.1,.1,1.0);
+    o.start(time); o.stop(time + 0.2);
+  }
+  else if(type === 'snare'){
+    // Snare: ruido filtrado
+    const buffer = ctx.createBuffer(1, ctx.sampleRate*0.1, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for(let i=0;i<data.length;i++){ 
+      data[i] = (Math.random()*2-1) * Math.pow(1-i/data.length, 2); 
+    }
+    const noise = ctx.createBufferSource(); noise.buffer = buffer;
+    const g = ctx.createGain(); g.gain.value = gain;
+    const filter = ctx.createBiquadFilter(); 
+    filter.type = 'highpass'; filter.frequency.value = 200;
+    noise.connect(filter).connect(g).connect(mainGain);
+    env(g, time, .001,.03,.05,.08,1.0);
+    noise.start(time); noise.stop(time + 0.15);
+  }
+  else if(type === 'hihat'){
+    // Hi-hat: ruido de alta frecuencia
+    const buffer = ctx.createBuffer(1, ctx.sampleRate*0.05, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for(let i=0;i<data.length;i++){ 
+      data[i] = (Math.random()*2-1) * Math.pow(1-i/data.length, 4); 
+    }
+    const noise = ctx.createBufferSource(); noise.buffer = buffer;
+    const g = ctx.createGain(); g.gain.value = gain;
+    const filter = ctx.createBiquadFilter(); 
+    filter.type = 'highpass'; filter.frequency.value = 8000;
+    noise.connect(filter).connect(g).connect(mainGain);
+    env(g, time, .001,.01,.02,.03,1.0);
+    noise.start(time); noise.stop(time + 0.08);
+  }
+}
+
+/* Sonidos dinámicos de Tachikomas */
+function scheduleTachikomasSounds(startTime, duration){
+  let T = startTime;
+  const endTime = startTime + duration;
+  
+  // Sonidos que entran y salen cada 8-12 segundos
+  while(T < endTime){
+    const nextSoundIn = 8 + Math.random() * 4; // 8-12 segundos
+    const soundDuration = 3 + Math.random() * 4; // 3-7 segundos
+    
+    if(T + nextSoundIn < endTime){
+      scheduleTachikomaSound(T + nextSoundIn, soundDuration);
+    }
+    T += nextSoundIn + soundDuration;
+  }
+}
+
+function scheduleTachikomaSound(startTime, duration){
+  // Sonido mecánico modulado (como pasos de robot)
+  const baseFreq = 150 + Math.random() * 100; // 150-250 Hz
+  const {o, g} = osc('square', baseFreq, 0.08);
+  
+  // Modulación rítmica
+  const lfoRate = 8 + Math.random() * 4; // 8-12 Hz
+  const lfo = ctx.createOscillator(); lfo.type = 'square'; lfo.frequency.value = lfoRate;
+  const lfoGain = ctx.createGain(); lfoGain.gain.value = 20;
+  lfo.connect(lfoGain).connect(o.frequency);
+  
+  // Envelope que entra y sale suavemente
+  g.gain.setValueAtTime(0.0001, startTime);
+  g.gain.linearRampToValueAtTime(0.08, startTime + 0.5); // fade in
+  g.gain.setValueAtTime(0.08, startTime + duration - 0.5); // mantener
+  g.gain.exponentialRampToValueAtTime(0.0001, startTime + duration); // fade out
+  
+  // Filtro que se modula
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.value = 300;
+  filter.Q.value = 2;
+  
+  o.disconnect();
+  o.connect(filter).connect(g).connect(mainGain);
+  
+  lfo.start(startTime); lfo.stop(startTime + duration);
+  o.start(startTime); o.stop(startTime + duration);
 }
 
 /* Zumbido de motor (bajo sutil) */
